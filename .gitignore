@@ -1,6 +1,5 @@
 # DAppNodeSDK release directories
-build_*
-build/
+build_*/
 
 # SDK artifacts
 releases.json
