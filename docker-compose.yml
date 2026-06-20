@@ -1,0 +1,81 @@
+version: "3.5"
+
+services:
+  secrets:
+    build:
+      context: .
+      dockerfile: build/secrets/Dockerfile
+    image: secrets.split-pro.public.dappnode.eth:0.1.0
+    restart: unless-stopped
+    volumes:
+      - config:/config
+
+  postgres:
+    build:
+      context: .
+      dockerfile: build/postgres/Dockerfile
+    image: postgres.split-pro.public.dappnode.eth:0.1.0
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD_FILE=/config/POSTGRES_PASSWORD
+      - POSTGRES_DB=splitpro
+      - POSTGRES_PORT=5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d splitpro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_cron
+      -c cron.database_name=splitpro
+      -c cron.timezone=UTC
+    volumes:
+      - config:/config:ro
+      - database:/var/lib/postgresql/data
+    depends_on:
+      - secrets
+
+  splitpro:
+    build:
+      context: .
+      dockerfile: build/splitpro/Dockerfile
+    image: splitpro.split-pro.public.dappnode.eth:0.1.0
+    restart: always
+    environment:
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD_FILE=/config/POSTGRES_PASSWORD
+      - POSTGRES_CONTAINER_NAME=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=splitpro
+      - NEXTAUTH_SECRET_FILE=/config/NEXTAUTH_SECRET
+      - NEXTAUTH_URL=http://split-pro.public.dappnode:3000
+      - NEXTAUTH_URL_INTERNAL=http://splitpro:3000
+      - DEFAULT_HOMEPAGE=/balances
+      - CURRENCY_RATE_PROVIDER=frankfurter
+      - ENABLE_SENDING_INVITES=true
+      - DISABLE_EMAIL_SIGNUP=false
+      - INVITE_ONLY=false
+      - UPLOAD_MAX_FILE_SIZE_MB=10
+      - EMAIL_TLS_REJECT_UNAUTHORIZED="1"
+      - FROM_EMAIL
+      - EMAIL_SERVER_HOST
+      - EMAIL_SERVER_PORT
+      - EMAIL_SERVER_USER
+      - EMAIL_SERVER_PASSWORD
+    ports:
+      - "3000:3000/tcp"
+    volumes:
+      - config:/config:ro
+      - uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  config: {}
+  database: {}
+  uploads: {}

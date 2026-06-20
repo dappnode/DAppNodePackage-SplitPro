@@ -1,0 +1,64 @@
+version: "2"
+fields:
+  - id: from_email
+    target:
+      type: environment
+      name: FROM_EMAIL
+      service: splitpro
+    title: From email address
+    description: >-
+      Sender email address for magic-link login emails and invites.
+      Example: splitpro@example.com
+    required: true
+    pattern: ^.+@.+\..+$
+    patternErrorMessage: "Enter a valid email address"
+
+  - id: email_server_host
+    target:
+      type: environment
+      name: EMAIL_SERVER_HOST
+      service: splitpro
+    title: SMTP host
+    description: >-
+      SMTP server hostname for sending emails.
+      Example: smtp.gmail.com
+    required: true
+    pattern: ^.{1,253}$
+    patternErrorMessage: "Enter a valid hostname"
+
+  - id: email_server_port
+    target:
+      type: environment
+      name: EMAIL_SERVER_PORT
+      service: splitpro
+    title: SMTP port
+    description: >-
+      SMTP server port. Common ports: 587 (STARTTLS), 465 (SSL/TLS), 25 (insecure).
+    required: true
+    pattern: '^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'
+    patternErrorMessage: "Enter a valid port number (1-65535)"
+
+  - id: email_server_user
+    target:
+      type: environment
+      name: EMAIL_SERVER_USER
+      service: splitpro
+    title: SMTP username
+    description: >-
+      SMTP authentication username. For Gmail, use your full email address.
+    required: true
+    pattern: ^.{1,128}$
+    patternErrorMessage: "Enter the SMTP username (1-128 characters)"
+
+  - id: email_server_password
+    target:
+      type: environment
+      name: EMAIL_SERVER_PASSWORD
+      service: splitpro
+      secret: true
+    title: SMTP password / API key
+    description: >-
+      SMTP authentication password or API key. For Gmail, use an App Password (not your account password).
+    required: true
+    pattern: ^.{1,256}$
+    patternErrorMessage: "Enter the SMTP password (1-256 characters)"
