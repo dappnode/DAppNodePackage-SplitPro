@@ -15,14 +15,17 @@ for file_var in $(env | grep -E '^[^=]+_FILE=' | cut -d'=' -f1); do
     echo "Set $base_var from $file_var ($file_path)" >&2
 done
 
-# Set NEXTAUTH_URL: use value from setup wizard if provided, otherwise auto-detect
-# from DAppNode's DynDNS domain, otherwise fall back to the internal package URL.
-if [ -z "$NEXTAUTH_URL" ] && [ -n "$_DAPPNODE_GLOBAL_DOMAIN" ]; then
-    export NEXTAUTH_URL="https://splitpro.${_DAPPNODE_GLOBAL_DOMAIN}"
-    echo "Auto-set NEXTAUTH_URL to $NEXTAUTH_URL" >&2
-elif [ -z "$NEXTAUTH_URL" ]; then
-    export NEXTAUTH_URL="http://split-pro.public.dappnode:3000"
-    echo "Set NEXTAUTH_URL to internal fallback: $NEXTAUTH_URL" >&2
+# Set NEXTAUTH_URL: custom domain (set in wizard) takes priority.
+# Local package URL and empty are treated as "not set" — replaced with DynDNS when available.
+_LOCAL_URL="http://split-pro.public.dappnode:3000"
+if [ "$NEXTAUTH_URL" = "$_LOCAL_URL" ] || [ -z "$NEXTAUTH_URL" ]; then
+    if [ -n "$_DAPPNODE_GLOBAL_DOMAIN" ]; then
+        export NEXTAUTH_URL="https://splitpro.${_DAPPNODE_GLOBAL_DOMAIN}"
+        echo "Auto-set NEXTAUTH_URL to $NEXTAUTH_URL" >&2
+    else
+        export NEXTAUTH_URL="$_LOCAL_URL"
+        echo "Set NEXTAUTH_URL to internal fallback: $NEXTAUTH_URL" >&2
+    fi
 fi
 
 # Publish the public URL to the DAppNode info tab
