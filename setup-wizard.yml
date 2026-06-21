@@ -1,5 +1,28 @@
 version: "2"
 fields:
+  # ── Auth provider selector ───────────────────────────────────────────────
+  - id: auth_provider
+    title: Authentication provider
+    description: >-
+      Choose how users sign in to SplitPro. All providers use NextAuth.
+      Email (SMTP) sends magic-link emails — no password needed.
+      Google OAuth lets users sign in with their Google account.
+      OIDC / Keycloak / Authentik use your own identity provider.
+
+      You can enable additional providers later via the Config tab.
+    enum:
+      - "Email (SMTP)"
+      - "Google OAuth"
+      - "OIDC"
+      - "Keycloak"
+      - "Authentik"
+    target:
+      type: environment
+      name: AUTH_PROVIDER
+      service: splitpro
+    required: true
+
+  # ── Email / SMTP fields ──────────────────────────────────────────────────
   - id: from_email
     target:
       type: environment
@@ -7,11 +30,17 @@ fields:
       service: splitpro
     title: From email address
     description: >-
-      Sender email address for magic-link login emails and invites.
-      Example: splitpro@example.com
+      Sender address for magic-link login emails and invites. Example: splitpro@example.com
+
+      Common SMTP providers: Gmail (smtp.gmail.com:587, use an App Password),
+      Mailgun, Resend, Brevo, Postmark.
     required: true
     pattern: ^.+@.+\..+$
     patternErrorMessage: "Enter a valid email address"
+    if:
+      auth_provider:
+        enum:
+          - "Email (SMTP)"
 
   - id: email_server_host
     target:
@@ -20,11 +49,14 @@ fields:
       service: splitpro
     title: SMTP host
     description: >-
-      SMTP server hostname for sending emails.
-      Example: smtp.gmail.com
+      SMTP server hostname. Examples: smtp.gmail.com, smtp.mailgun.org, smtp.resend.com
     required: true
     pattern: ^.{1,253}$
     patternErrorMessage: "Enter a valid hostname"
+    if:
+      auth_provider:
+        enum:
+          - "Email (SMTP)"
 
   - id: email_server_port
     target:
@@ -33,10 +65,14 @@ fields:
       service: splitpro
     title: SMTP port
     description: >-
-      SMTP server port. Common ports: 587 (STARTTLS), 465 (SSL/TLS), 25 (insecure).
+      Common ports: 587 (STARTTLS, recommended), 465 (SSL/TLS), 25 (insecure).
     required: true
     pattern: '^([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])$'
     patternErrorMessage: "Enter a valid port number (1-65535)"
+    if:
+      auth_provider:
+        enum:
+          - "Email (SMTP)"
 
   - id: email_server_user
     target:
@@ -49,6 +85,10 @@ fields:
     required: true
     pattern: ^.{1,128}$
     patternErrorMessage: "Enter the SMTP username (1-128 characters)"
+    if:
+      auth_provider:
+        enum:
+          - "Email (SMTP)"
 
   - id: email_server_password
     target:
@@ -58,7 +98,253 @@ fields:
       secret: true
     title: SMTP password / API key
     description: >-
-      SMTP authentication password or API key. For Gmail, use an App Password (not your account password).
+      SMTP authentication password or API key.
+      For Gmail: create an App Password at myaccount.google.com/apppasswords
+      (requires 2-Step Verification enabled). Do not use your Gmail account password.
     required: true
     pattern: ^.{1,256}$
     patternErrorMessage: "Enter the SMTP password (1-256 characters)"
+    if:
+      auth_provider:
+        enum:
+          - "Email (SMTP)"
+
+  # ── Google OAuth fields ──────────────────────────────────────────────────
+  - id: google_client_id
+    target:
+      type: environment
+      name: GOOGLE_CLIENT_ID
+      service: splitpro
+    title: Google Client ID
+    description: >-
+      OAuth 2.0 client ID from Google Cloud Console.
+
+      To get credentials:
+      1. Go to console.cloud.google.com → APIs & Services → Credentials
+      2. Create an OAuth 2.0 Client ID (Web application)
+      3. Add your app URL as an Authorized redirect URI:
+         https://splitpro.<hash>.dyndns.dappnode.io/api/auth/callback/google
+         (or your custom domain if you have one)
+      4. Copy the Client ID here.
+    required: true
+    pattern: ^.{10,}$
+    patternErrorMessage: "Enter a valid Google Client ID"
+    if:
+      auth_provider:
+        enum:
+          - "Google OAuth"
+
+  - id: google_client_secret
+    target:
+      type: environment
+      name: GOOGLE_CLIENT_SECRET
+      service: splitpro
+      secret: true
+    title: Google Client Secret
+    description: >-
+      OAuth 2.0 client secret from the same Google Cloud Console credential.
+    required: true
+    pattern: ^.{10,}$
+    patternErrorMessage: "Enter a valid Google Client Secret"
+    if:
+      auth_provider:
+        enum:
+          - "Google OAuth"
+
+  # ── Generic OIDC fields ──────────────────────────────────────────────────
+  - id: oidc_name
+    target:
+      type: environment
+      name: OIDC_NAME
+      service: splitpro
+    title: OIDC provider name
+    description: >-
+      Display name shown on the sign-in button. Example: "My Company SSO"
+    required: true
+    pattern: ^.{1,64}$
+    patternErrorMessage: "Enter a provider name (1-64 characters)"
+    if:
+      auth_provider:
+        enum:
+          - "OIDC"
+
+  - id: oidc_client_id
+    target:
+      type: environment
+      name: OIDC_CLIENT_ID
+      service: splitpro
+    title: OIDC Client ID
+    description: >-
+      Client ID from your OIDC provider's application registration.
+    required: true
+    pattern: ^.{1,256}$
+    patternErrorMessage: "Enter the OIDC Client ID"
+    if:
+      auth_provider:
+        enum:
+          - "OIDC"
+
+  - id: oidc_client_secret
+    target:
+      type: environment
+      name: OIDC_CLIENT_SECRET
+      service: splitpro
+      secret: true
+    title: OIDC Client Secret
+    description: >-
+      Client secret from your OIDC provider's application registration.
+    required: true
+    pattern: ^.{1,512}$
+    patternErrorMessage: "Enter the OIDC Client Secret"
+    if:
+      auth_provider:
+        enum:
+          - "OIDC"
+
+  - id: oidc_well_known_url
+    target:
+      type: environment
+      name: OIDC_WELL_KNOWN_URL
+      service: splitpro
+    title: OIDC Well-Known URL
+    description: >-
+      The OpenID Connect discovery endpoint for your provider.
+      Example: https://sso.example.com/.well-known/openid-configuration
+    required: true
+    pattern: ^https?://.+$
+    patternErrorMessage: "Enter a valid URL starting with http:// or https://"
+    if:
+      auth_provider:
+        enum:
+          - "OIDC"
+
+  # ── Keycloak fields ──────────────────────────────────────────────────────
+  - id: keycloak_id
+    target:
+      type: environment
+      name: KEYCLOAK_ID
+      service: splitpro
+    title: Keycloak Client ID
+    description: >-
+      Client ID from your Keycloak realm's client configuration.
+
+      To get credentials:
+      1. Open Keycloak Admin Console → your realm → Clients
+      2. Create a new client (type: OpenID Connect)
+      3. Set the redirect URI to: <your-splitpro-url>/api/auth/callback/keycloak
+      4. Copy the Client ID here.
+    required: true
+    pattern: ^.{1,256}$
+    patternErrorMessage: "Enter the Keycloak Client ID"
+    if:
+      auth_provider:
+        enum:
+          - "Keycloak"
+
+  - id: keycloak_secret
+    target:
+      type: environment
+      name: KEYCLOAK_SECRET
+      service: splitpro
+      secret: true
+    title: Keycloak Client Secret
+    description: >-
+      Client secret from Keycloak → Clients → your client → Credentials tab.
+    required: true
+    pattern: ^.{1,512}$
+    patternErrorMessage: "Enter the Keycloak Client Secret"
+    if:
+      auth_provider:
+        enum:
+          - "Keycloak"
+
+  - id: keycloak_issuer
+    target:
+      type: environment
+      name: KEYCLOAK_ISSUER
+      service: splitpro
+    title: Keycloak Issuer URL
+    description: >-
+      Your Keycloak realm URL. Format: https://keycloak.example.com/realms/your-realm
+    required: true
+    pattern: ^https?://.+$
+    patternErrorMessage: "Enter a valid URL starting with https://"
+    if:
+      auth_provider:
+        enum:
+          - "Keycloak"
+
+  # ── Authentik fields ─────────────────────────────────────────────────────
+  - id: authentik_id
+    target:
+      type: environment
+      name: AUTHENTIK_ID
+      service: splitpro
+    title: Authentik Client ID
+    description: >-
+      Client ID from your Authentik OAuth2/OpenID provider.
+
+      To get credentials:
+      1. Open Authentik Admin → Applications → Providers
+      2. Create an OAuth2/OpenID Provider
+      3. Set the redirect URI to: <your-splitpro-url>/api/auth/callback/authentik
+      4. Copy the Client ID here.
+    required: true
+    pattern: ^.{1,256}$
+    patternErrorMessage: "Enter the Authentik Client ID"
+    if:
+      auth_provider:
+        enum:
+          - "Authentik"
+
+  - id: authentik_secret
+    target:
+      type: environment
+      name: AUTHENTIK_SECRET
+      service: splitpro
+      secret: true
+    title: Authentik Client Secret
+    description: >-
+      Client secret from your Authentik provider configuration.
+    required: true
+    pattern: ^.{1,512}$
+    patternErrorMessage: "Enter the Authentik Client Secret"
+    if:
+      auth_provider:
+        enum:
+          - "Authentik"
+
+  - id: authentik_issuer
+    target:
+      type: environment
+      name: AUTHENTIK_ISSUER
+      service: splitpro
+    title: Authentik Issuer URL
+    description: >-
+      Your Authentik instance URL. Format: https://authentik.example.com/application/o/splitpro/
+    required: true
+    pattern: ^https?://.+$
+    patternErrorMessage: "Enter a valid URL starting with https://"
+    if:
+      auth_provider:
+        enum:
+          - "Authentik"
+
+  # ── Custom domain (optional) ─────────────────────────────────────────────
+  - id: nextauth_url
+    target:
+      type: environment
+      name: NEXTAUTH_URL
+      service: splitpro
+    title: App URL (optional — custom domain only)
+    description: >-
+      Leave blank to use the DynDNS URL automatically
+      (https://splitpro.<hash>.dyndns.dappnode.io).
+
+      Set this only if you are using a custom domain, e.g. https://splitpro.yourdomain.com.
+      Must include https:// and no trailing slash.
+
+      See the package README for instructions on setting up a custom domain with Cloudflare.
+    required: false
+    pattern: ^$|^https?://.+[^/]$
+    patternErrorMessage: "Enter a full URL (https://splitpro.yourdomain.com) or leave blank"

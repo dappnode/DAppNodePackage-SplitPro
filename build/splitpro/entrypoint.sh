@@ -15,6 +15,16 @@ for file_var in $(env | grep -E '^[^=]+_FILE=' | cut -d'=' -f1); do
     echo "Set $base_var from $file_var ($file_path)" >&2
 done
 
+# Set NEXTAUTH_URL: use value from setup wizard if provided, otherwise auto-detect
+# from DAppNode's DynDNS domain, otherwise fall back to the internal package URL.
+if [ -z "$NEXTAUTH_URL" ] && [ -n "$_DAPPNODE_GLOBAL_DOMAIN" ]; then
+    export NEXTAUTH_URL="https://splitpro.${_DAPPNODE_GLOBAL_DOMAIN}"
+    echo "Auto-set NEXTAUTH_URL to $NEXTAUTH_URL" >&2
+elif [ -z "$NEXTAUTH_URL" ]; then
+    export NEXTAUTH_URL="http://split-pro.public.dappnode:3000"
+    echo "Set NEXTAUTH_URL to internal fallback: $NEXTAUTH_URL" >&2
+fi
+
 # Construct and EXPORT DATABASE_URL (upstream start.sh sets it but doesn't export it)
 if [ -z "$DATABASE_URL" ]; then
     DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:${POSTGRES_PORT}/${POSTGRES_DB}"

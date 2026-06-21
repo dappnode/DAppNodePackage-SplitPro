@@ -52,7 +52,7 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_DB=splitpro
       - NEXTAUTH_SECRET_FILE=/config/NEXTAUTH_SECRET
-      - NEXTAUTH_URL=http://split-pro.public.dappnode:3000
+      - NEXTAUTH_URL
       - NEXTAUTH_URL_INTERNAL=http://splitpro:3000
       - DEFAULT_HOMEPAGE=/balances
       - CURRENCY_RATE_PROVIDER=frankfurter
@@ -66,6 +66,18 @@ services:
       - EMAIL_SERVER_PORT
       - EMAIL_SERVER_USER
       - EMAIL_SERVER_PASSWORD
+      - GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET
+      - OIDC_NAME
+      - OIDC_CLIENT_ID
+      - OIDC_CLIENT_SECRET
+      - OIDC_WELL_KNOWN_URL
+      - KEYCLOAK_ID
+      - KEYCLOAK_SECRET
+      - KEYCLOAK_ISSUER
+      - AUTHENTIK_ID
+      - AUTHENTIK_SECRET
+      - AUTHENTIK_ISSUER
     ports:
       - "3000:3000/tcp"
     volumes:
