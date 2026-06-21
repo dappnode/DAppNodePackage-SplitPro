@@ -26,9 +26,15 @@ elif [ -z "$NEXTAUTH_URL" ]; then
 fi
 
 # Publish the public URL to the DAppNode info tab
-curl -sf -X POST \
-    "http://my.dappnode/data-send?key=Publicly+reachable+UI+(share+with+friends)&data=${NEXTAUTH_URL}" \
-    >/dev/null 2>&1 || true
+node -e "
+const http = require('http');
+const u = new URL('http://my.dappnode/data-send');
+u.searchParams.set('key', 'Publicly reachable UI (share with friends)');
+u.searchParams.set('data', process.env.NEXTAUTH_URL || '');
+const req = http.request(u, {method:'POST'}, r => r.resume());
+req.on('error', e => console.error('data-send failed:', e.message));
+req.end();
+" 2>&1 || true
 
 # Construct and EXPORT DATABASE_URL (upstream start.sh sets it but doesn't export it)
 if [ -z "$DATABASE_URL" ]; then
