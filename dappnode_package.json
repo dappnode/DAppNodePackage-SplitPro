@@ -22,6 +22,15 @@
     "docs": "https://github.com/oss-apps/split-pro",
     "github": "https://github.com/oss-apps/split-pro"
   },
+  "exposable": [
+    {
+      "name": "SplitPro",
+      "description": "SplitPro web UI — expense sharing for groups",
+      "serviceName": "splitpro",
+      "port": 3000,
+      "fromSubdomain": "splitpro"
+    }
+  ],
   "backup": [
     {
       "name": "database",
