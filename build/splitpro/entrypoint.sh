@@ -25,6 +25,11 @@ elif [ -z "$NEXTAUTH_URL" ]; then
     echo "Set NEXTAUTH_URL to internal fallback: $NEXTAUTH_URL" >&2
 fi
 
+# Publish the public URL to the DAppNode info tab
+curl -sf -X POST \
+    "http://my.dappnode/data-send?key=Publicly+reachable+UI+(share+with+friends)&data=${NEXTAUTH_URL}" \
+    >/dev/null 2>&1 || true
+
 # Construct and EXPORT DATABASE_URL (upstream start.sh sets it but doesn't export it)
 if [ -z "$DATABASE_URL" ]; then
     DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_CONTAINER_NAME}:${POSTGRES_PORT}/${POSTGRES_DB}"
