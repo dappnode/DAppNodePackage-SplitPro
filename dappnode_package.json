@@ -22,6 +22,12 @@
     "docs": "https://github.com/oss-apps/split-pro",
     "github": "https://github.com/oss-apps/split-pro"
   },
+  "globalEnvs": [
+    {
+      "envs": ["DOMAIN"],
+      "services": ["splitpro"]
+    }
+  ],
   "exposable": [
     {
       "name": "SplitPro",
