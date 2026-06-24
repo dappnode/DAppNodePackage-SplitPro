@@ -1,42 +1,8 @@
 {
-  "name": "split-pro.public.dappnode.eth",
-  "version": "0.1.0",
-  "upstreamRepo": "oss-apps/split-pro",
-  "shortDescription": "SplitPro — free shared expenses for groups",
-  "description": "SplitPro is a free, open-source app for sharing expenses with friends and family. Create groups, add expenses, and settle up. This DAppNode package runs SplitPro with PostgreSQL, pg_cron for recurring transactions, and email magic-link authentication via NextAuth.\n\nPackage entrypoint:\n- Web app: http://split-pro.public.dappnode:3000\n\nSetup wizard:\n- Configure SMTP settings for email signup and invites. Email is the primary auth provider. OAuth/OIDC providers can be added later via environment variables.\n\nImportant notes:\n- On first launch, the package generates POSTGRES_PASSWORD and NEXTAUTH_SECRET and persists them in the config volume.\n- The splitpro server uses NextAuth email OTP (magic link) authentication. SMTP must be configured for sign-in to work.\n- Recurring transactions require pg_cron which is enabled by default.",
-  "type": "service",
-  "architectures": ["linux/amd64"],
-  "mainService": "splitpro",
+  "architectures": [
+    "linux/amd64"
+  ],
   "author": "lanski <Pol-Lanski> (https://github.com/pol-lanski)",
-  "categories": ["Developer tools"],
-  "keywords": [
-    "SplitPro",
-    "expenses",
-    "sharing",
-    "groups",
-    "splitwise"
-  ],
-  "links": {
-    "homepage": "https://splitpro.app",
-    "ui": "http://split-pro.public.dappnode:3000",
-    "docs": "https://github.com/oss-apps/split-pro",
-    "github": "https://github.com/oss-apps/split-pro"
-  },
-  "globalEnvs": [
-    {
-      "envs": ["DOMAIN"],
-      "services": ["splitpro"]
-    }
-  ],
-  "exposable": [
-    {
-      "name": "SplitPro",
-      "description": "SplitPro web UI — expense sharing for groups",
-      "serviceName": "splitpro",
-      "port": 3000,
-      "fromSubdomain": "splitpro"
-    }
-  ],
   "backup": [
     {
       "name": "database",
@@ -54,15 +20,58 @@
       "service": "secrets"
     }
   ],
-  "warnings": {
-    "onInstall": "Configure SMTP settings in the setup wizard to enable email magic-link signup. Without SMTP, no one can sign in. POSTGRES_PASSWORD and NEXTAUTH_SECRET are auto-generated on first launch.",
-    "onReset": "Resetting this package removes your database, uploaded receipts, and auto-generated secrets.",
-    "onRemove": "Removing this package also removes all SplitPro data. Back up your volumes first if you want to keep your data."
-  },
+  "categories": [
+    "Developer tools"
+  ],
   "changelog": "Initial DAppNode package for SplitPro v2.1.3. Includes PostgreSQL with pg_cron, auto-generated secrets, and setup wizard for SMTP configuration.",
+  "description": "SplitPro is a free, open-source app for sharing expenses with friends and family. Create groups, add expenses, and settle up. This DAppNode package runs SplitPro with PostgreSQL, pg_cron for recurring transactions, and email magic-link authentication via NextAuth.\n\nPackage entrypoint:\n- Web app: http://split-pro.public.dappnode:3000\n\nSetup wizard:\n- Configure SMTP settings for email signup and invites. Email is the primary auth provider. OAuth/OIDC providers can be added later via environment variables.\n\nImportant notes:\n- On first launch, the package generates POSTGRES_PASSWORD and NEXTAUTH_SECRET and persists them in the config volume.\n- The splitpro server uses NextAuth email OTP (magic link) authentication. SMTP must be configured for sign-in to work.\n- Recurring transactions require pg_cron which is enabled by default.",
+  "exposable": [
+    {
+      "description": "SplitPro web UI — expense sharing for groups",
+      "fromSubdomain": "splitpro",
+      "name": "SplitPro",
+      "port": 3000,
+      "serviceName": "splitpro"
+    }
+  ],
+  "globalEnvs": [
+    {
+      "envs": [
+        "DOMAIN"
+      ],
+      "services": [
+        "splitpro"
+      ]
+    }
+  ],
+  "keywords": [
+    "SplitPro",
+    "expenses",
+    "sharing",
+    "groups",
+    "splitwise"
+  ],
+  "license": "AGPL-3.0",
+  "links": {
+    "docs": "https://github.com/oss-apps/split-pro",
+    "github": "https://github.com/oss-apps/split-pro",
+    "homepage": "https://splitpro.app",
+    "ui": "http://split-pro.public.dappnode:3000"
+  },
+  "mainService": "splitpro",
+  "name": "split-pro.public.dappnode.eth",
   "repository": {
     "type": "git",
     "url": "https://github.com/oss-apps/split-pro.git"
   },
-  "license": "AGPL-3.0"
+  "shortDescription": "SplitPro — free shared expenses for groups",
+  "type": "service",
+  "upstreamRepo": "oss-apps/split-pro",
+  "upstreamVersion": "v2.1.4",
+  "version": "0.1.1",
+  "warnings": {
+    "onInstall": "Configure SMTP settings in the setup wizard to enable email magic-link signup. Without SMTP, no one can sign in. POSTGRES_PASSWORD and NEXTAUTH_SECRET are auto-generated on first launch.",
+    "onRemove": "Removing this package also removes all SplitPro data. Back up your volumes first if you want to keep your data.",
+    "onReset": "Resetting this package removes your database, uploaded receipts, and auto-generated secrets."
+  }
 }
