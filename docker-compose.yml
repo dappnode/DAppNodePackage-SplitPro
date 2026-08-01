@@ -44,7 +44,7 @@ services:
     image: splitpro.split-pro.public.dappnode.eth:0.1.0
     restart: always
     environment:
-      - HOSTNAME=0.0.0.0
+      - HOSTNAME=v2.1.5
       - PORT=3000
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD_FILE=/config/POSTGRES_PASSWORD
