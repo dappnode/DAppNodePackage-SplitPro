@@ -4,7 +4,8 @@ RUN apk update && apk add --no-cache git
 
 WORKDIR /app
 
-RUN git clone --depth 1 --branch v2.1.3 https://github.com/oss-apps/split-pro.git .
+ARG UPSTREAM_VERSION=v2.1.3
+RUN git clone --depth 1 --branch "${UPSTREAM_VERSION}" https://github.com/oss-apps/split-pro.git .
 
 ENV SKIP_ENV_VALIDATION=true
 ENV DOCKER_OUTPUT=1
