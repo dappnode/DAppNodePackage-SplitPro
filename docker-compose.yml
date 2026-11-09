@@ -42,7 +42,7 @@ services:
       context: .
       dockerfile: build/splitpro/Dockerfile
       args:
-        UPSTREAM_VERSION: v2.1.3
+        UPSTREAM_VERSION: v2.1.6
     image: splitpro.split-pro.public.dappnode.eth:0.1.0
     restart: always
     environment:
