@@ -68,7 +68,7 @@
   "changelog": "Initial DAppNode package for SplitPro v2.1.3. Includes PostgreSQL with pg_cron, auto-generated secrets, and setup wizard for SMTP configuration.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/oss-apps/split-pro.git"
+    "url": "https://github.com/dappnode/DAppNodePackage-SplitPro.git"
   },
   "license": "AGPL-3.0"
 }
